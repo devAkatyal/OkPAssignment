@@ -1,6 +1,9 @@
-package com.assignment.okpassignment
+package com.assignment.okpassignment.fragments
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +11,7 @@ import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.assignment.okpassignment.R
 import com.assignment.okpassignment.databinding.FragmentVerificationBinding
 
 class VerificationFragment : Fragment() {
@@ -63,7 +67,7 @@ class VerificationFragment : Fragment() {
         val inputs = listOf(binding.etOtp1, binding.etOtp2, binding.etOtp3, binding.etOtp4)
         
         inputs.forEachIndexed { index, editText ->
-            editText.addTextChangedListener(object : android.text.TextWatcher {
+            editText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -77,12 +81,12 @@ class VerificationFragment : Fragment() {
                     }
                 }
 
-                override fun afterTextChanged(s: android.text.Editable?) {}
+                override fun afterTextChanged(s: Editable?) {}
             })
 
             // Handle backspace when field is already empty
             editText.setOnKeyListener { _, keyCode, event ->
-                if (keyCode == android.view.KeyEvent.KEYCODE_DEL && event.action == android.view.KeyEvent.ACTION_DOWN) {
+                if (keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN) {
                     if (editText.text.isEmpty() && index > 0) {
                         inputs[index - 1].requestFocus()
                          // Optionally consume the event, though returning false usually fine for standard behavior 
