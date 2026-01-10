@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "48907364270",
+    "project_id": "okpassignment",
+    "storage_bucket": "okpassignment.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48907364270:android:78ec2c8c6ff0b2eeeb0a3f",
+        "android_client_info": {
+          "package_name": "com.assignment.okpassignment"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_NrGCNC6FXHkP9nqiemmM-Xlj723z9lk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
