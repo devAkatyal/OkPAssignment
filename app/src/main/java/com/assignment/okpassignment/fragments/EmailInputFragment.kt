@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.assignment.okpassignment.R
 import com.assignment.okpassignment.databinding.FragmentEmailInputBinding
+import com.assignment.okpassignment.repository.AuthRepository
 
 class EmailInputFragment : Fragment() {
 
@@ -25,6 +26,8 @@ class EmailInputFragment : Fragment() {
         return binding.root
     }
 
+    private val authRepository = AuthRepository()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -35,8 +38,16 @@ class EmailInputFragment : Fragment() {
         binding.btnContinue.setOnClickListener {
             val email = binding.etEmail.text.toString()
             if (email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                val bundle = bundleOf("email" to email)
-                findNavController().navigate(R.id.action_emailInputFragment_to_verificationFragment, bundle)
+                binding.btnContinue.isEnabled = false
+                authRepository.requestOtp(email)
+                    .addOnSuccessListener {
+                        val bundle = bundleOf("email" to email)
+                        findNavController().navigate(R.id.action_emailInputFragment_to_verificationFragment, bundle)
+                    }
+                    .addOnFailureListener { e ->
+                        binding.btnContinue.isEnabled = true
+                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             } else {
                 Toast.makeText(requireContext(), "Please enter a valid email", Toast.LENGTH_SHORT).show()
             }

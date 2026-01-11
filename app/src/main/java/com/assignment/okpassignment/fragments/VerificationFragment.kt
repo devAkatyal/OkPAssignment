@@ -1,6 +1,7 @@
 package com.assignment.okpassignment.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.assignment.okpassignment.R
 import com.assignment.okpassignment.databinding.FragmentVerificationBinding
+import com.assignment.okpassignment.repository.AuthRepository
 
 class VerificationFragment : Fragment() {
 
@@ -34,6 +36,8 @@ class VerificationFragment : Fragment() {
         return binding.root
     }
 
+    private val authRepository = AuthRepository()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -44,20 +48,52 @@ class VerificationFragment : Fragment() {
         }
 
         binding.tvResend.setOnClickListener {
-            Toast.makeText(requireContext(), "Code resent to $email", Toast.LENGTH_SHORT).show()
+             email?.let {
+                 authRepository.requestOtp(it)
+                     .addOnSuccessListener {
+                         Toast.makeText(requireContext(), "OTP resent successfully", Toast.LENGTH_SHORT).show()
+                     }
+                     .addOnFailureListener { e ->
+                         Toast.makeText(requireContext(), "Failed to resend OTP: ${e.message}", Toast.LENGTH_SHORT).show()
+                     }
+             }
         }
 
         binding.btnVerify.setOnClickListener {
-            // Dummy verification: any code length 4 works
              val otp = binding.etOtp1.text.toString() +
                       binding.etOtp2.text.toString() +
                       binding.etOtp3.text.toString() +
                       binding.etOtp4.text.toString()
 
+            Log.d("VerificationFragment", "Verify clicked. Email: $email, OTP: $otp")
+
             if (otp.length == 4) {
-                 val bundle = bundleOf("email" to email)
-                findNavController().navigate(R.id.action_verificationFragment_to_successFragment, bundle)
+                 binding.btnVerify.isEnabled = false
+                 email?.let { e ->
+                     Log.d("VerificationFragment", "Calling verifyOtp...")
+                     authRepository.verifyOtp(e, otp)
+                         .addOnSuccessListener { token ->
+                             Log.d("VerificationFragment", "verifyOtp success. Token received, calling signInWithCustomToken...")
+                             authRepository.signInWithCustomToken(token)
+                                 .addOnSuccessListener {
+                                     Log.d("VerificationFragment", "signInWithCustomToken success. Navigating to success screen.")
+                                     val bundle = bundleOf("email" to email)
+                                     findNavController().navigate(R.id.action_verificationFragment_to_successFragment, bundle)
+                                 }
+                                 .addOnFailureListener { err ->
+                                     Log.e("VerificationFragment", "signInWithCustomToken failure", err)
+                                     binding.btnVerify.isEnabled = true
+                                     Toast.makeText(requireContext(), "Login failed: ${err.message}", Toast.LENGTH_SHORT).show()
+                                 }
+                         }
+                         .addOnFailureListener { err ->
+                             Log.e("VerificationFragment", "verifyOtp failure", err)
+                             binding.btnVerify.isEnabled = true
+                             Toast.makeText(requireContext(), "Verification failed: ${err.message}", Toast.LENGTH_SHORT).show()
+                         }
+                 }
             } else {
+                Log.w("VerificationFragment", "OTP length is not 4: ${otp.length}")
                 Toast.makeText(requireContext(), "Please enter complete code", Toast.LENGTH_SHORT).show()
             }
         }
