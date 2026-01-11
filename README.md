@@ -5,7 +5,6 @@ This Android application demonstrates a complete authentication flow using Fireb
 ## Features
 - **Email OTP Sign-In**: Users receive a 4-digit code via email (powered by SendGrid & Firebase Cloud Functions).
 - **Google Sign-In**: Standard Google authentication integration.
-- **Glassmorphism UI**: Modern and premium aesthetic for the onboarding and authentication screens.
 
 ## Prerequisites
 - **Android Studio** (Latest version recommended)
