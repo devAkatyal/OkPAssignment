@@ -1,6 +1,7 @@
 package com.assignment.okpassignment.fragments
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.text.Editable
 import android.text.TextWatcher
@@ -38,8 +39,12 @@ class VerificationFragment : Fragment() {
 
     private val authRepository = AuthRepository()
 
+    private var resendTimer: CountDownTimer? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        startResendTimer()
 
         setupOtpNavigation()
 
@@ -52,6 +57,7 @@ class VerificationFragment : Fragment() {
                  authRepository.requestOtp(it)
                      .addOnSuccessListener {
                          Toast.makeText(requireContext(), "OTP resent successfully", Toast.LENGTH_SHORT).show()
+                         startResendTimer()
                      }
                      .addOnFailureListener { e ->
                          Toast.makeText(requireContext(), "Failed to resend OTP: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -77,6 +83,7 @@ class VerificationFragment : Fragment() {
                              authRepository.signInWithCustomToken(token)
                                  .addOnSuccessListener {
                                      Log.d("VerificationFragment", "signInWithCustomToken success. Navigating to success screen.")
+                                     Toast.makeText(requireContext(), "Authentication Successful", Toast.LENGTH_SHORT).show()
                                      val bundle = bundleOf("email" to email)
                                      findNavController().navigate(R.id.action_verificationFragment_to_successFragment, bundle)
                                  }
@@ -135,8 +142,28 @@ class VerificationFragment : Fragment() {
         }
     }
 
+    private fun startResendTimer() {
+        resendTimer?.cancel()
+        binding.tvResend.isEnabled = false
+        binding.tvResend.alpha = 0.5f
+
+        resendTimer = object : CountDownTimer(30000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val seconds = millisUntilFinished / 1000
+                binding.tvResend.text = "Resend code in 00:%02d".format(seconds)
+            }
+
+            override fun onFinish() {
+                binding.tvResend.isEnabled = true
+                binding.tvResend.alpha = 1.0f
+                binding.tvResend.text = "Resend code"
+            }
+        }.start()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        resendTimer?.cancel()
         _binding = null
     }
 }
